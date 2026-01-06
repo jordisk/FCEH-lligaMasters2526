@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Resultats Lliga Masters CEAP</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #0f172a;
+            color: #e5e7eb;
+            margin: 0;
+            padding: 30px;
+        }
+
+        h1, h2 {
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 25px;
+            background: #020617;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        th {
+            background: #1e293b;
+            color: #f1f5f9;
+            padding: 12px;
+        }
+
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #1f2937;
+        }
+
+        tr:hover {
+            background: #111827;
+        }
+
+        .badge {
+            background: #38bdf8;
+            color: #020617;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-weight: bold;
+        }
+
+        .filters {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        select {
+            padding: 8px;
+            margin: 5px;
+            border-radius: 8px;
+        }
+
+        button {
+            padding: 10px 18px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .totals-box, .ranking-box {
+            margin-top: 40px;
+            background: #020617;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        canvas {
+            margin-top: 20px;
+        }
+
+        .right {
+            text-align: right;
+        }
+
+
+
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Resultats Lliga Masters CEAP</h1>
+
+<div class="filters">
+<!--
+
+    <form method="get">
+
+        <select name="carrera">
+            <option value="">Totes les curses</option>
+            {% for c in carreras %}
+            <option value="{{c}}" {% if c == carrera_filter %}selected{% endif %}>{{c}}</option>
+            {% endfor %}
+        </select>
+
+        <select name="corredor">
+            <option value="">Tots els corredors</option>
+            {% for c in corredores %}
+            <option value="{{c}}" {% if c == corredor_filter %}selected{% endif %}>{{c}}</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Filtrar</button>
+    </form>
+
+-->
+</div>
+
+
+<table>
+    <thead>
+        <tr>
+            <th align="left">Corredor</th>
+            <th align="left">Cursa</th>
+            <th align="left">Data</th>
+            <th align="left">T Màniga 1</th>
+            <th align="left">T Màniga 2</th>
+            <th align="left">P Màniga 1</th>
+            <th align="left">P Màniga 2</th>
+            <th align="left">Posició final</th>
+            <th align="right">Puntuació</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for r in rows %}
+        <tr>
+            <td>{{ r["Corredor"] }}</td>
+            <td>{{ r["Cursa"] }}</td>
+            <td>{{ r["Data"] }}</td>
+            <td>{{ r["T Màniga 1"] }}</td>
+            <td>{{ r["T Màniga 2"] }}</td>
+            <td>{{ r["P Màniga 1"] }}</td>
+            <td>{{ r["P Màniga 1"] }}</td>
+            <td>{{ r["Posició"] }}</td>
+            <td align="right"><span class="badge">{{ r["Puntuació"]|int }}</span></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+<div class="totals-box">
+    <h2>Puntuació total per cursa</h2>
+
+    <canvas id="raceChart"></canvas>
+</div>
+
+
+<div class="ranking-box">
+    <h2>Ranking de punts</h2>
+
+    <table>
+        <tr>
+            <th align="left">Corredor</th>
+            <th align="right">Punts totals</th>
+        </tr>
+
+        {% for corredor, puntos in ranking %}
+        <tr>
+            <td>{{ corredor }}</td>
+            <td class="right"><span class="badge">{{ puntos |int }}</span></td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+
+<div class="ranking-box">
+    <h2>Puntuació per Clubs</h2>
+
+    <table>
+        <tr>
+            <th align="left">Club</th>
+            {% for race in races %}
+            <th align="left">{{ race }}</th>
+            {% endfor %}
+            <th align="right">Total</th>
+        </tr>
+
+        {% for club in clubs_sorted %}
+        <tr>
+            <td align="left">{{ club }}</td>
+
+            {% for race in races %}
+            <td>
+                <span class="badge">
+                {{ club_scores[club][race] | int }}
+                </span>
+            </td>
+            {% endfor %}
+
+            <td align="right">
+                <span class="badge">
+                {{ club_totals[club] | int }}
+                </span>
+            </td>
+        </tr>
+        {% endfor %}
+
+    </table>
+</div>
+
+
+
+</div>
+
+
+<script>
+const raceLabels = {{ totals_by_race.keys() | list | tojson }};
+const raceData   = {{ totals_by_race.values() | list | tojson }};
+
+new Chart(
+  document.getElementById('raceChart'),
+  {
+    type: 'bar',
+    data: {
+      labels: raceLabels,
+      datasets: [{
+        label: 'Punts totals',
+        data: raceData
+      }]
+    }
+  }
+);
+</script>
+
+
+
+
+</body>
+</html>
+
